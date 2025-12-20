@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8" />
+
+  <title>World Unemployment vs World GDP by Income Group</title>
+  
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; padding: 2.5rem; background:#f5f7fb; color:#222; }
+    h1 { margin-bottom: 1.5rem; }
+    .chart-wrapper { position: relative; max-width: 980px; }
+    svg { width: 100%; height: 520px; }
+    .axis path, .axis line { stroke: #ccd3e1; }
+    .axis text { fill: #4a4f63; font-size: 0.9rem; }
+    .line-path { fill: none; stroke: #0074d9; stroke-width: 3; }
+    .dot { fill: #0057a3; stroke: #fff; stroke-width: 1.5; }
+    .tooltip {
+      position: absolute; background: white; border: 1px solid #d8deed; border-radius: 6px;
+      padding: 0.4rem 0.6rem; pointer-events: none; font-size: 0.85rem;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+      opacity: 0; transition: opacity 0.15s ease;
+    }
+  </style>
+</head>
+<body>
+  <h1>World Unemployment vs World GDP by Income Group</h1>
+  <div class="chart-wrapper">
+    <svg id="unemployment-chart"></svg>
+    <div id="tooltip" class="tooltip"></div>
+  </div>
+
+  <script>
+    // Load datasets from local workspace root
+    const metricPath = "metric.csv"; // aggregates incl. World unemployment
+    const countryPath = "country.csv"; // country-level unemployment with IncomeGroup
+    const worldGdpPath = "world_gdp.csv"; // expected file with columns: Date,GDPTrillions
+
+    Promise.all([
+      d3.csv(metricPath, d3.autoType),
+      d3.csv(countryPath, d3.autoType).catch(() => []),
+      d3.csv(worldGdpPath, d3.autoType).catch(() => [])
+    ]).then(([metricRows, countryRows, gdpRows]) => {
+      // World Unemployment series (from metric.csv)
+      const worldUnemp = metricRows
+        .filter(d => d.CountryName === "World")
+        .map(d => ({ year: +d.Date, unemp: +d.Rate }))
+        .sort((a, b) => a.year - b.year);
+
+      // Income Group series (from country.csv)
+      const byGroupYear = d3.rollup(
+        countryRows,
+        v => d3.mean(v, d => +d.UnempRate),
+        d => d.IncomeGroup,
+        d => +d.Date
+      );
+      const incomeGroups = Array.from(byGroupYear.keys());
+      const groupSeries = incomeGroups.map(group => {
+        const yearMap = byGroupYear.get(group);
+        const points = Array.from(yearMap || [], ([year, rate]) => ({ year, rate }))
+          .sort((a, b) => a.year - b.year);
+        return { key: group, values: points };
+      }).filter(s => s.values.length > 0);
+
+      // World GDP series (from world_gdp.csv) – optional
+      const worldGdp = (gdpRows || [])
+        .map(d => ({ year: +d.Date, gdp: +d.GDPTrillions }))
+        .filter(d => !Number.isNaN(d.year) && !Number.isNaN(d.gdp))
+        .sort((a, b) => a.year - b.year);
+
+      const svg = d3.select("#unemployment-chart");
+      const width = svg.node().getBoundingClientRect().width;
+      const height = +svg.attr("height") || 520;
+      const margin = { top: 40, right: 70, bottom: 60, left: 70 };
+      const innerWidth = width - margin.left - margin.right;
+      const innerHeight = height - margin.top - margin.bottom;
+
+      const g = svg
+        .attr("viewBox", `0 0 ${width} ${height}`)
+        .append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
+
+      // X domain across all series
+      const yearsAll = [
+        ...worldUnemp.map(d => d.year),
+        ...groupSeries.flatMap(s => s.values.map(v => v.year)),
+        ...worldGdp.map(d => d.year)
+      ];
+      const x = d3.scaleLinear()
+        .domain(d3.extent(yearsAll))
+        .range([0, innerWidth]);
+
+      // Left Y for unemployment (world + income groups)
+      const maxUnemp = d3.max([
+        d3.max(worldUnemp, d => d.unemp),
+        d3.max(groupSeries, s => d3.max(s.values, v => v.rate))
+      ].filter(v => v !== undefined));
+      const yLeft = d3.scaleLinear()
+        .domain([0, (maxUnemp || 0) * 1.1]).nice()
+        .range([innerHeight, 0]);
+
+      // Right Y for GDP (trillions)
+      const maxGdp = d3.max(worldGdp, d => d.gdp) || 0;
+      const yRight = d3.scaleLinear()
+        .domain([0, maxGdp * 1.1]).nice()
+        .range([innerHeight, 0]);
+
+      // Axes
+      const xAxis = d3.axisBottom(x).tickFormat(d3.format("d"));
+      const yAxisLeft = d3.axisLeft(yLeft).tickFormat(d => d + "%");
+      const yAxisRight = d3.axisRight(yRight).tickFormat(d => d + "T");
+
+      g.append("g")
+        .attr("class", "axis")
+        .attr("transform", `translate(0,${innerHeight})`)
+        .call(xAxis);
+
+      g.append("g").attr("class", "axis").call(yAxisLeft);
+      g.append("g")
+        .attr("class", "axis")
+        .attr("transform", `translate(${innerWidth},0)`)
+        .call(yAxisRight);
+
+      // Line generators
+      const lineUnemp = d3.line()
+        .x(d => x(d.year))
+        .y(d => yLeft(d.unemp))
+        .curve(d3.curveMonotoneX);
+
+      const lineGroup = d3.line()
+        .x(d => x(d.year))
+        .y(d => yLeft(d.rate))
+        .curve(d3.curveMonotoneX);
+
+      const lineGdp = d3.line()
+        .x(d => x(d.year))
+        .y(d => yRight(d.gdp))
+        .curve(d3.curveMonotoneX);
+
+      // Colors for income groups
+      const color = d3.scaleOrdinal()
+        .domain(incomeGroups)
+        .range(["#1f77b4","#2ca02c","#d62728","#9467bd","#8c564b","#e377c2"]);
+
+      // Draw income group lines
+      groupSeries.forEach(s => {
+        g.append("path")
+          .datum(s.values)
+          .attr("fill", "none")
+          .attr("stroke", color(s.key))
+          .attr("stroke-width", 2.5)
+          .attr("d", lineGroup)
+          .attr("data-series", s.key);
+      });
+
+      // Draw world unemployment line (distinct color and width)
+      if (worldUnemp.length) {
+        g.append("path")
+          .datum(worldUnemp)
+          .attr("fill", "none")
+          .attr("stroke", "#0074d9")
+          .attr("stroke-width", 3)
+          .attr("d", lineUnemp)
+          .attr("data-series", "World Unemployment");
+      }
+
+      // Draw world GDP line if available
+      if (worldGdp.length) {
+        g.append("path")
+          .datum(worldGdp)
+          .attr("fill", "none")
+          .attr("stroke", "#ff7f0e")
+          .attr("stroke-width", 3)
+          .attr("d", lineGdp)
+          .attr("data-series", "World GDP");
+      } else {
+        console.warn("world_gdp.csv not found or empty; GDP line will be skipped.");
+      }
+
+      // Labels
+      g.append("text")
+        .attr("x", innerWidth / 2)
+        .attr("y", innerHeight + 45)
+        .attr("text-anchor", "middle")
+        .text("Year");
+
+      g.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("x", -innerHeight / 2)
+        .attr("y", -50)
+        .attr("text-anchor", "middle")
+        .text("Unemployment rate (%)");
+
+      g.append("text")
+        .attr("transform", "rotate(90)")
+        .attr("x", innerHeight / 2)
+        .attr("y", innerWidth + 55)
+        .attr("text-anchor", "middle")
+        .text("World GDP (Trillions USD)");
+
+      // Tooltip
+      const tooltip = d3.select("#tooltip");
+      function showTip(xPos, yPos, html) {
+        tooltip.style("opacity", 1)
+          .style("left", `${xPos}px`)
+          .style("top", `${yPos + 10}px`)
+          .html(html);
+      }
+      function hideTip() { tooltip.style("opacity", 0); }
+
+      // Hover dots for world lines
+      g.selectAll(".dot-world-unemp")
+        .data(worldUnemp)
+        .enter()
+        .append("circle")
+        .attr("class", "dot dot-world-unemp")
+        .attr("cx", d => x(d.year))
+        .attr("cy", d => yLeft(d.unemp))
+        .attr("r", 3.5)
+        .on("mouseover", (event, d) => {
+          const xPos = x(d.year) + margin.left;
+          const yPos = yLeft(d.unemp) + margin.top;
+          showTip(xPos, yPos, `<strong>${d.year}</strong><br/>World Unemp: ${d.unemp.toFixed(2)}%`);
+        })
+        .on("mouseout", hideTip);
+
+      g.selectAll(".dot-world-gdp")
+        .data(worldGdp)
+        .enter()
+        .append("circle")
+        .attr("class", "dot dot-world-gdp")
+        .attr("cx", d => x(d.year))
+        .attr("cy", d => yRight(d.gdp))
+        .attr("r", 3.5)
+        .attr("fill", "#ff7f0e")
+        .on("mouseover", (event, d) => {
+          const xPos = x(d.year) + margin.left;
+          const yPos = yRight(d.gdp) + margin.top;
+          showTip(xPos, yPos, `<strong>${d.year}</strong><br/>World GDP: ${d.gdp.toFixed(1)}T`);
+        })
+        .on("mouseout", hideTip);
+
+      // Legend
+      const legendItems = [
+        ...(worldUnemp.length ? [{ label: "World Unemployment", color: "#0074d9" }] : []),
+        ...(worldGdp.length ? [{ label: "World GDP", color: "#ff7f0e" }] : []),
+        ...groupSeries.map(s => ({ label: s.key, color: color(s.key) }))
+      ];
+
+      const legend = d3.select(".chart-wrapper")
+        .append("div")
+        .style("display", "flex")
+        .style("gap", "14px")
+        .style("margin", "10px 0 0 0");
+
+      legend.selectAll(".legend-item")
+        .data(legendItems)
+        .enter()
+        .append("div")
+        .attr("class", "legend-item")
+        .style("display", "flex")
+        .style("alignItems", "center")
+        .html(d => `<span style="display:inline-block;width:16px;height:3px;background:${d.color};margin-right:8px"></span>${d.label}`);
+
+    }).catch(err => console.error("Failed to load CSVs:", err));
+  </script>
+</body>
+</html>
