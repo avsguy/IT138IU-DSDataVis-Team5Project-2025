@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <meta charset="utf-8" />
+      <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+      <title>Exploring World Unemployment</title>
+      <meta name="description" content="Final project for IT138IU Data Science and Data Visualization" />
+      
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;700&display=swap" rel="stylesheet"> 
+      
+      <link rel="stylesheet" href="styles.css" />
+  </head>
+
+  <body>
+
+    <div id="member">
+        <a>Soya Shaina - ITDSIU23040 | Trần Châu Thanh Tuấn - ITDSIU23027</a> | 
+        <a href="https://github.com/avsguy/IT138IU-DSDataVis-Team5Project-2025">Github</a>
+    </div>
+
+    <main>
+      <section class="generic" id="intro">
+        <h1>
+            World Unemployment
+        </h1>
+
+        <p>
+            This website aims to answer the following questions.
+        </p>
+
+        <ul>
+            <li>Which countries have <b>consistently low unemployment rate</b>?</li>
+            <li><b>Where</b> are they from?</li>
+            <li>What are their <b>level of development</b>?</li>
+        </ul>
+
+        <p>
+            Our team hypothesizes that <b>countries with a high level of development</b> and <b>Western countries (North America and Europe)</b> would have lower rates compared to the rest of the world.
+        </p>
+
+        <p>
+        Source
+        <a href="https://data.worldbank.org/indicator/SL.UEM.TOTL.ZS?end=2024&start=1991">Unemployment Rate Data</a>
+        <!--| <a href="https://data.worldbank.org/indicator/NY.GDP.MKTP.KD.ZG?end=2024&start=1991">GDP Growth Data</a> -->
+        </p>
+        <p class="separator">
+        </p>
+      </section>
+
+      <section id="scrolly">
+
+        <figure>
+          <div class="viz" id="countries"></div>
+          <div class="viz" id="metrics"></div>
+        </figure>  
+        <article> 
+            
+            <div class="step" data-step="1">
+              
+                <h2>World Unemployment Over The Years</h2>
+                <p>
+                    First, let us see what the unemployment rate over the years for all countries.
+                </p>
+                <br>
+                <p style="color: grey">v Scroll down v</p>
+            </div>
+            
+            <div class="step" data-step="2">
+                <h2>Criteria</h2>
+                <p>
+                    As said by
+                    <a href="https://www.studysmarter.co.uk/explanations/macroeconomics/economic-performance/unemployment-rate/">
+                        Lily Hulatt</a>, low to normal unemployment rates are <b>less than or equal to 5</b>.
+
+                </p>
+                <br>
+                <p style="color: grey">v Scroll down v</p>
+            </div>
+            
+            
+            <div class="step" data-step="3">
+                <h2>Focus in</h2>
+                <p>
+                    Let's focus on countries that have average rates less than or equal to 5.
+                </p>
+                <br>
+                <p style="color: grey">v Scroll down v</p>
+            </div>
+            
+            <div class="step" data-step="4">
+                <h2>General Location</h2>
+                <p>
+                    Let's plot out where these countries are.
+                </p>
+                <p>
+                    When you hover, you may see the average unemployment rates of each country.
+                </p>
+                <br>
+                <p style="color: grey">v Scroll down v</p>
+            </div>
+            
+            <div class="step" data-step="5">
+                <h2>The Specifics</h2>
+                <p>
+                    Here is a more detailed distribution of the countries with low average unemployment rate based on region and income group.
+                </p>
+                <p>
+                    The World Bank uses "Income Groups" to show the level of development of a country.
+                </p>
+                <br>
+                <br>
+                <p style="color: grey">v Scroll down v</p>
+            </div>
+
+        </article>
+        
+      </section>
+
+      
+      <section class="generic" id="outro">
+        <p class="separator">
+        </p>
+        <h2>Conclusion</h2>
+        <p>
+            Restating our hypothesis, <b>Western countries</b> such as North American countries and European countries are commonly seen as <b>highly developed</b> which might have safeguards against joblessness.
+             
+        </p> 
+            <p>But based on the data explored so far, it is <b>not true</b>.</p>
+        <p>
+            <b>High income countries</b> which represents highly developed countries scored <b>second</b> while <b>lower middle income countries had the lowest unemployment rate in general</b>. 
+            <b>Sub-Saharan Africa tops the charts</b> with <b>Europe and Central Asia third</b> and North America is not seen here.
+            Only Austria, Iceland, Kyrgyz Republic, Luxembourg, Moldova, Netherlands, Norway, and Switzerland from Europe had low rates.
+        </p>  
+        <p>
+            More research must be done to better understand why this is the case. Some suggestions are to see the relationship of regions and income groups regarding unemployment rate and to consider other factors that may affect unemployment rate such as demographics, economic performance and implemented strategies of countries.
+        </p>
+  
+      </section>
+      <section class="generic" id="footer">
+        <p>
+            <i>
+                This project website was created for the Data Science and Data Visualization course (IT138IU Semester 1 A.Y. 2025-26).
+            </i>  
+        </p>
+      </section>
+    </main>
+
+    <script src="src/d3.v7.min.js"></script>
+    <script src="src/intersection-observer.js"></script>
+    <script src="src/stickyfill.min.js"></script>
+    <script src="src/scrollama.min.js"></script>
+    <script src="dataviz.js"></script>
+    <script src="scrollamaCode.js"></script>
+  </body>
+</html>
+
