@@ -9,7 +9,7 @@ We have used this website as a template for this project, but the data visualiza
 
 (Last Updated: December 21, 2025)
 
-===================================================================================
+===========================================================================
 
 Project structure:
 ```
@@ -52,7 +52,7 @@ API
 - https://github.com/russellsamora/scrollama
 - https://github.com/wilddeer/stickyfill
 
-===================================================================================
+===========================================================================
 
 Tools we used for this project:
 - RStudio
@@ -64,7 +64,7 @@ Tools we used for this project:
   
 Note: Although LLMs are used, they made frequent mistakes that needed double checking constantly. Without knowledge of Javascript, it is impossible to make a working website with correct information. 
 
-===================================================================================
+===========================================================================
 
 For people who would like to learn more about scrollytelling, here are some references.
 
@@ -116,7 +116,7 @@ Note: d3.nest is deprecated. d3.group is needed for grouping data so a lot of th
 About line charts
 - https://www.addtwodigital.com/add-two-blog/2022/5/4/rule-31-line-charts-shouldnt-have-too-many-lines
 
-===================================================================================
+===========================================================================
 
 How to set up a local web server to see your website and console logs
 1. Make sure you have installed Python or node.js.
@@ -144,3 +144,7 @@ http://localhost:8888/[put the name of your html file].html
 You should see your website now.
 
 Right-click and click on Inspect. Go to the Consoles tab to see your console logs.
+
+===========================================================================
+
+Thank you for reading this.
