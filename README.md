@@ -11,12 +11,55 @@ We have used this website as a template for this project, but the data visualiza
 
 ===================================================================================
 
+Project structure:
+```
+├── IT138IU-DSDataVis-Team5Project-2025/
+│   ├── data/
+│   │   ├── countries.geojson
+│   │   ├── country.csv
+│   │   └── metric.csv
+│   ├── dataCleaning/
+│   │   ├── dataprep.R
+│   │   ├── metadata.csv
+│   │   ├── readme_datacleaning.txt
+│   │   └── unemp_worldgdp.csv
+│   ├── metrics/
+│   │   ├── country.csv
+│   │   ├── line2.html
+│   │   ├── metric.csv
+│   │   └── world_gdp.csv
+│   ├── src/
+│   │   ├── d3.v7.min.js
+│   │   ├── intersection-observer.js
+│   │   ├── scrollama.min.js
+│   │   └── stickyfill.min.js
+│   ├── LICENSE
+│   ├── README.md
+│   ├── dataviz.js
+│   ├── index.html
+│   ├── scrollamaCode.js
+│   └── styles.css
+```
+Sources:
+
+Data
+- https://data.worldbank.org/indicator/SL.UEM.TOTL.ZS
+- https://github.com/datasets/geo-countries/tree/main
+
+API
+- https://d3js.org/getting-started
+- https://edriessen.com/app/scrollytelling-demo/
+- https://github.com/russellsamora/scrollama
+- https://github.com/wilddeer/stickyfill
+
+===================================================================================
+
 Tools we used for this project:
 - RStudio
 - Visual Studio Code with Live Preview Extension
-- Python local web server for console logging (a guide on how to set up a local web server is at the bottom of this document.)
+- Python local web server for console logging (A guide on how to set up a local web server is at the bottom of this document.)
 - D3.js
-- Scrollama
+- Scrollama.js
 - For transparency, DeepSeek and Copilot are used for debugging.
   
 Note: Although LLMs are used, they made frequent mistakes that needed double checking constantly. Without knowledge of Javascript, it is impossible to make a working website with correct information. 
